@@ -68,17 +68,10 @@ sub new {
     
     my $logger = Log::Log4perl->get_logger("OESS.Traceroute");
     
-    my %args = (
-        db => undef,
-        @_
-    );
+    my $db = shift || undef;
 
     my $self = $class->SUPER::new($service,"/controller1");
     
-    foreach my $key (keys %args){
-        $self->{$key} = $args{$key};
-    }
-
     bless $self, $class;
     $self->{'first_run'} = 1;
     $self->{'logger'}    = $logger;
@@ -87,9 +80,8 @@ sub new {
     $self->{pending_packets} = {};
 
     
-    if ($args{'db'}){
-        $self->{'db'} = $args{'db'};
-       
+    if (defined($db)){
+        $self->{'db'} = $db;
     }
     else {
         $self->{'db'} = OESS::Database->new();
@@ -360,8 +352,9 @@ sub process_trace_packet {
            
                 my $e_node = $endpoint->{'node'};
                 my $e_dpid = $circuit_details->{'dpid_lookup'}->{$e_node};
-            
+
                 if ( $e_dpid == $transaction->{'source_endpoint'}->{'dpid'} ) {
+
                     next;
                 }
 
